@@ -1,4 +1,5 @@
 // First, i call the libraries i need
+#include <stdlib.h>
 #include <termios.h>
 #include <unistd.h>
 
