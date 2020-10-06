@@ -3,6 +3,8 @@
 #include <termios.h>
 #include <unistd.h>
 
+struct termios orig_termios;
+
 void enableRawMode()
 {
     struct termios raw;
