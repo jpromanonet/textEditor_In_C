@@ -6,11 +6,21 @@
 #endif
 
 // Then call the libraries we need
-#include <ctype.h>
-#include <stdio.h>
-#include <stdlib.h>
 #include <termios.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <stdint.h>
+#include <errno.h>
+#include <string.h>
+#include <ctype.h>
+#include <time.h>
+#include <sys/types.h>
+#include <sys/ioctl.h>
+#include <sys/time.h>
 #include <unistd.h>
+#include <stdarg.h>
+#include <fcntl.h>
+#include <signal.h>
 
 // This structure allows the program
 // to hide the shell and start the console
