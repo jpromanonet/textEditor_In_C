@@ -27,6 +27,13 @@
 // as a blank screen
 struct termios orig_termios;
 
+// This an error handling function
+void die(const char *s)
+{
+    perror(s);
+    exit(1);
+}
+
 // This function disables de Raw mode when we
 // Press Q to exit the program
 void disableRawMode()
