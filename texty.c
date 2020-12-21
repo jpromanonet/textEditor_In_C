@@ -79,19 +79,32 @@ struct editorConfig {
 static struct editorConfig E;
 
 enum KEY_ACTION{
-        KEY_NULL = 0,       /* NULL */
-        CTRL_C = 3,         /* Ctrl-c */
-        CTRL_D = 4,         /* Ctrl-d */
-        CTRL_F = 6,         /* Ctrl-f */
-        CTRL_H = 8,         /* Ctrl-h */
-        TAB = 9,            /* Tab */
-        CTRL_L = 12,        /* Ctrl+l */
-        ENTER = 13,         /* Enter */
-        CTRL_Q = 17,        /* Ctrl-q */
-        CTRL_S = 19,        /* Ctrl-s */
-        CTRL_U = 21,        /* Ctrl-u */
-        ESC = 27,           /* Escape */
-        BACKSPACE =  127,   /* Backspace */
+        /* NULL */
+        KEY_NULL = 0,       
+        /* Ctrl-c */
+        CTRL_C = 3,
+        /* Ctrl-d */         
+        CTRL_D = 4,
+        /* Ctrl-f */         
+        CTRL_F = 6,
+        /* Ctrl-h */         
+        CTRL_H = 8,
+        /* Tab */         
+        TAB = 9,
+        /* Ctrl+l */            
+        CTRL_L = 12,        
+        /* Enter */
+        ENTER = 13,         
+        /* Ctrl-q */
+        CTRL_Q = 17,        
+        /* Ctrl-s */
+        CTRL_S = 19,        
+        /* Ctrl-u */
+        CTRL_U = 21,        
+        /* Escape */
+        ESC = 27,           
+        /* Backspace */
+        BACKSPACE =  127,   
         /* The following are just soft codes, not really reported by the
          * terminal directly. */
         ARROW_LEFT = 1000,
@@ -147,7 +160,8 @@ struct editorSyntax HLDB[] = {
 
 /* ======================= Low level terminal handling ====================== */
 
-static struct termios orig_termios; /* In order to restore at exit.*/
+/* In order to restore at exit.*/
+static struct termios orig_termios; 
 
 void disableRawMode(int fd) {
     /* Don't even check the return value as it's too late. */
@@ -162,11 +176,12 @@ void editorAtExit(void) {
     disableRawMode(STDIN_FILENO);
 }
 
-/* Raw mode: 1960 magic shit. */
+/* Raw mode: Old School typing on the terminal */
 int enableRawMode(int fd) {
     struct termios raw;
 
-    if (E.rawmode) return 0; /* Already enabled. */
+    /* Raw mode Already enabled. */
+    if (E.rawmode) return 0; 
     if (!isatty(STDIN_FILENO)) goto fatal;
     atexit(editorAtExit);
     if (tcgetattr(fd,&orig_termios) == -1) goto fatal;
@@ -183,8 +198,10 @@ int enableRawMode(int fd) {
      * no signal chars (^Z,^C) */
     raw.c_lflag &= ~(ECHO | ICANON | IEXTEN | ISIG);
     /* control chars - set return condition: min number of bytes and timer. */
-    raw.c_cc[VMIN] = 0; /* Return each byte, or zero for timeout. */
-    raw.c_cc[VTIME] = 1; /* 100 ms timeout (unit is tens of second). */
+    /* Return each byte, or zero for timeout. */
+    raw.c_cc[VMIN] = 0; 
+    /* 100 ms timeout (unit is tens of second). */
+    raw.c_cc[VTIME] = 1; 
 
     /* put terminal in raw mode after flushing */
     if (tcsetattr(fd,TCSAFLUSH,&raw) < 0) goto fatal;
@@ -206,7 +223,8 @@ int editorReadKey(int fd) {
 
     while(1) {
         switch(c) {
-        case ESC:    /* escape sequence */
+        /* escape sequence */
+        case ESC:    
             /* If this is just an ESC, we'll timeout here. */
             if (read(fd,seq,1) == 0) return ESC;
             if (read(fd,seq+1,1) == 0) return ESC;
@@ -331,7 +349,8 @@ void editorUpdateSyntax(erow *row) {
     row->hl = realloc(row->hl,row->rsize);
     memset(row->hl,HL_NORMAL,row->rsize);
 
-    if (E.syntax == NULL) return; /* No syntax, everything is HL_NORMAL. */
+    /* No syntax, everything is HL_NORMAL. */
+    if (E.syntax == NULL) return; 
 
     int i, prev_sep, in_string, in_comment;
     char *p;
@@ -347,9 +366,12 @@ void editorUpdateSyntax(erow *row) {
         p++;
         i++;
     }
-    prev_sep = 1; /* Tell the parser if 'i' points to start of word. */
-    in_string = 0; /* Are we inside "" or '' ? */
-    in_comment = 0; /* Are we inside multi-line comment? */
+    /* Tell the parser if 'i' points to start of word. */
+    prev_sep = 1; 
+    /* Are we inside "" or '' ? */
+    in_string = 0; 
+    /* Are we inside multi-line comment? */
+    in_comment = 0; 
 
     /* If the previous line has an open comment, this line starts
      * with an open comment state. */
@@ -446,7 +468,8 @@ void editorUpdateSyntax(erow *row) {
             }
             if (keywords[j] != NULL) {
                 prev_sep = 0;
-                continue; /* We had a keyword match */
+                /* We had a keyword match */
+                continue; 
             }
         }
 
@@ -468,13 +491,20 @@ void editorUpdateSyntax(erow *row) {
 int editorSyntaxToColor(int hl) {
     switch(hl) {
     case HL_COMMENT:
-    case HL_MLCOMMENT: return 36;     /* cyan */
-    case HL_KEYWORD1: return 33;    /* yellow */
-    case HL_KEYWORD2: return 32;    /* green */
-    case HL_STRING: return 35;      /* magenta */
-    case HL_NUMBER: return 31;      /* red */
-    case HL_MATCH: return 34;      /* blu */
-    default: return 37;             /* white */
+    /* cyan */
+    case HL_MLCOMMENT: return 36;   
+    /* yellow */  
+    case HL_KEYWORD1: return 33;    
+    /* green */
+    case HL_KEYWORD2: return 32;    
+    /* magenta */
+    case HL_STRING: return 35;      
+    /* red */
+    case HL_NUMBER: return 31;     
+    /* blue */ 
+    case HL_MATCH: return 34;      
+    /* white */
+    default: return 37;             
     }
 }
 
@@ -589,9 +619,11 @@ char *editorRowsToString(int *buflen) {
 
     /* Compute count of bytes */
     for (j = 0; j < E.numrows; j++)
-        totlen += E.row[j].size+1; /* +1 is for "\n" at end of every row */
+    /* +1 is for "\n" at end of every row */
+        totlen += E.row[j].size+1; 
     *buflen = totlen;
-    totlen++; /* Also make space for nulterm */
+    /* Also make space for nulterm */
+    totlen++; 
 
     p = buf = malloc(totlen);
     for (j = 0; j < E.numrows; j++) {
@@ -833,8 +865,10 @@ void editorRefreshScreen(void) {
     char buf[32];
     struct abuf ab = ABUF_INIT;
 
-    abAppend(&ab,"\x1b[?25l",6); /* Hide cursor. */
-    abAppend(&ab,"\x1b[H",3); /* Go home. */
+    /* Hide cursor. */
+    abAppend(&ab,"\x1b[?25l",6);
+    /* Go home. */ 
+    abAppend(&ab,"\x1b[H",3); 
     for (y = 0; y < E.screenrows; y++) {
         int filerow = E.rowoff+y;
 
@@ -940,7 +974,8 @@ void editorRefreshScreen(void) {
     }
     snprintf(buf,sizeof(buf),"\x1b[%d;%dH",E.cy+1,cx);
     abAppend(&ab,buf,strlen(buf));
-    abAppend(&ab,"\x1b[?25h",6); /* Show cursor. */
+    /* Show cursor. */
+    abAppend(&ab,"\x1b[?25h",6); 
     write(STDOUT_FILENO,ab.b,ab.len);
     abFree(&ab);
 }
@@ -962,9 +997,12 @@ void editorSetStatusMessage(const char *fmt, ...) {
 void editorFind(int fd) {
     char query[TEXTY_QUERY_LEN+1] = {0};
     int qlen = 0;
-    int last_match = -1; /* Last line where a match was found. -1 for none. */
-    int find_next = 0; /* if 1 search next, if -1 search prev. */
-    int saved_hl_line = -1;  /* No saved HL */
+    /* Last line where a match was found. -1 for none. */
+    int last_match = -1;
+    /* if 1 search next, if -1 search prev. */ 
+    int find_next = 0; 
+    /* No saved HL */
+    int saved_hl_line = -1;  
     char *saved_hl = NULL;
 
 #define FIND_RESTORE_HL do { \
@@ -1140,14 +1178,17 @@ void editorProcessKeypress(int fd) {
 
     int c = editorReadKey(fd);
     switch(c) {
-    case ENTER:         /* Enter */
+    /* Enter */
+    case ENTER:         
         editorInsertNewline();
         break;
-    case CTRL_C:        /* Ctrl-c */
-        /* We ignore ctrl-c, it can't be so simple to lose the changes
-         * to the edited file. */
+    /* Ctrl-c */
+    case CTRL_C:        
+    /* We ignore ctrl-c, it can't be so simple to lose the changes
+     * to the edited file. */
         break;
-    case CTRL_Q:        /* Ctrl-q */
+    /* Ctrl-q */
+    case CTRL_Q:        
         /* Quit if the file was already saved. */
         if (E.dirty && quit_times) {
             editorSetStatusMessage("WARNING!!! File has unsaved changes. "
@@ -1157,14 +1198,17 @@ void editorProcessKeypress(int fd) {
         }
         exit(0);
         break;
-    case CTRL_S:        /* Ctrl-s */
+    /* Ctrl-s */
+    case CTRL_S:        
         editorSave();
         break;
     case CTRL_F:
         editorFind(fd);
         break;
-    case BACKSPACE:     /* Backspace */
-    case CTRL_H:        /* Ctrl-h */
+    /* Backspace */
+    case BACKSPACE:     
+    /* Ctrl-h */
+    case CTRL_H:        
     case DEL_KEY:
         editorDelChar();
         break;
@@ -1188,7 +1232,8 @@ void editorProcessKeypress(int fd) {
     case ARROW_RIGHT:
         editorMoveCursor(c);
         break;
-    case CTRL_L: /* ctrl+l, clear screen */
+    /* ctrl+l, clear screen */
+    case CTRL_L: 
         /* Just refresht the line as side effect. */
         break;
     case ESC:
@@ -1199,7 +1244,8 @@ void editorProcessKeypress(int fd) {
         break;
     }
 
-    quit_times = TEXTY_QUIT_TIMES; /* Reset it to the original value. */
+    /* Reset it to the original value. */
+    quit_times = TEXTY_QUIT_TIMES; 
 }
 
 int editorFileWasModified(void) {
@@ -1212,7 +1258,8 @@ void updateWindowSize(void) {
         perror("Unable to query the screen for size (columns / rows)");
         exit(1);
     }
-    E.screenrows -= 2; /* Get room for status bar. */
+    /* Get room for status bar. */
+    E.screenrows -= 2; 
 }
 
 void handleSigWinCh(int unused __attribute__((unused))) {
